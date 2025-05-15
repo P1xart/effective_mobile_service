@@ -1,0 +1,68 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "CRM Backend API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/v1/human/": {
+            "post": {
+                "description": "Создание нового человека",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "люди"
+                ],
+                "summary": "Создание нового человека",
+                "parameters": [
+                    {
+                        "description": "Тело запроса",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_P1xart_effective_mobile_service_internal_controller_v1_request.CreateHuman"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_P1xart_effective_mobile_service_internal_controller_v1_request.CreateHuman": {
+            "type": "object",
+            "required": [
+                "name",
+                "surname"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Vasiliy"
+                },
+                "potronymic": {
+                    "type": "string",
+                    "example": "Vasilevich"
+                },
+                "surname": {
+                    "type": "string",
+                    "example": "Vasiliev"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

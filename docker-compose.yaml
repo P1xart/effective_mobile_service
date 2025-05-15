@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:16.3
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "5432"
+      POSTGRES_DB: "eff_mobile"
+    volumes:
+      - app_pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  migrations:
+    build:
+      context: .
+      dockerfile: migrations.Dockerfile
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "5432"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_DB: "eff_mobile"
+    depends_on:
+      - postgres
+  
+  service:
+    build:
+      context: .
+    restart: always
+    environment:
+      APP_ENV: prod
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 8080
+      PG_USER: postgres
+      PG_PASSWORD: 5432
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_DATABASE: eff_mobile
+    volumes:
+      - ./config.yaml:/app/config.yaml
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  app_pg_data:

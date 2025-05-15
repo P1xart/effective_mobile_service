@@ -1,0 +1,18 @@
+http:
+  host: localhost
+  port: 8081
+postgresql:
+  user:
+  password:
+  host:
+  port:
+  database: eff_mobile
+  ssl_mode:
+minio:
+  host: localhost
+  port: 9000
+  access_key:
+  secret_key:
+jwt:
+  sign_key:
+  token_ttl: 60m

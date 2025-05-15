@@ -1,0 +1,45 @@
+definitions:
+  github_com_P1xart_effective_mobile_service_internal_controller_v1_request.CreateHuman:
+    properties:
+      name:
+        example: Vasiliy
+        type: string
+      potronymic:
+        example: Vasilevich
+        type: string
+      surname:
+        example: Vasiliev
+        type: string
+    required:
+    - name
+    - surname
+    type: object
+info:
+  contact: {}
+  title: CRM Backend API
+  version: "1.0"
+paths:
+  /v1/human/:
+    post:
+      consumes:
+      - application/json
+      description: Создание нового человека
+      parameters:
+      - description: Тело запроса
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_P1xart_effective_mobile_service_internal_controller_v1_request.CreateHuman'
+      responses:
+        "204":
+          description: No Content
+      summary: Создание нового человека
+      tags:
+      - люди
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

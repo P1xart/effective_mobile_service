@@ -1,0 +1,13 @@
+# ideas
+.idea
+.vscode
+
+# builds  
+bin
+build
+
+# volumes
+app_pg_data
+
+# tmp
+.static

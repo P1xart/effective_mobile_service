@@ -1,0 +1,6 @@
+# ideas
+.idea
+.vscode
+
+# volumes
+app_pg_data
