@@ -37,6 +37,7 @@ func newHumanRoutes(log *slog.Logger, g *gin.RouterGroup, humanService service.H
 	g.POST("/", r.createNewHuman)
 	g.GET("/", r.getHumans)
 	g.DELETE("/:id", r.deleteHumanByID)
+	g.PATCH("/:id", r.updateCarByID)
 }
 
 // @Summary Создание нового человека
@@ -68,7 +69,7 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 		return
 	}
 
-	err = r.humanService.Create(c, &service.CreateHuman{
+	err = r.humanService.Create(c, &service.HumanInput{
 		Name:       human.Name,
 		Surname:    human.Surname,
 		Potronymic: human.Potronymic,
@@ -131,7 +132,7 @@ func (r *humanRoutes) deleteHumanByID(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, service.ErrHumanNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": service.ErrHumanNotFound,
+				"error": service.ErrHumanNotFound.Error(),
 			})
 			return
 		}
@@ -143,5 +144,50 @@ func (r *humanRoutes) deleteHumanByID(c *gin.Context) {
 		return
 	}
 
+	c.Status(http.StatusNoContent)
+}
+
+// @Summary Обновить человека по его идентификатору
+// @Description Обновить человека по его идентификатору. Принимает JSON с обновленными полями
+// @Tags люди
+// @Accept json
+// @Param id path string true "Идентификатор человека"
+// @Param input body request.UpdateHuman true "Тело запроса"
+// @Success 204 "No Content"
+// @Router /v1/human/{id} [patch]
+func (r *humanRoutes) updateCarByID(c *gin.Context) {
+	humanIDStr := c.Param("id")
+	var updateData request.UpdateHuman
+
+	if err := c.ShouldBindJSON(&updateData); err != nil {
+		r.log.Error("Invalid JSON payload", logger.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid JSON payload",
+		})
+		return
+	}
+
+	if err := r.humanService.UpdateByID(c, humanIDStr, &service.HumanInput{
+		Name: updateData.Name,
+		Surname: updateData.Surname,
+		Potronymic: updateData.Potronymic,
+		Age: updateData.Age,
+		Gender: updateData.Gender,
+		Nationality: updateData.Nationality,
+	}); err != nil {
+		if errors.Is(err, service.ErrHumanNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": service.ErrHumanNotFound.Error(),
+			})
+			return
+		}
+
+		r.log.Error("failed to update human", logger.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	r.log.Debug("successfully updated human", slog.String("id", humanIDStr))
 	c.Status(http.StatusNoContent)
 }

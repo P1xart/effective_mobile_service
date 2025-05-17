@@ -16,7 +16,7 @@ type Human struct {
 type AgeResp struct {
 	Count int    `json:"count"`
 	Name  string `json:"name"`
-	Age   int    `json:"age"`
+	Age   string `json:"age"`
 }
 
 type GenderResp struct {

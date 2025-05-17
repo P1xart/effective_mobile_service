@@ -10,19 +10,20 @@ import (
 	"github.com/P1xart/effective_mobile_service/internal/repo"
 )
 
-type CreateHuman struct {
+type Human interface {
+	Create(ctx context.Context, body *HumanInput, apiUrls config.ApiUrls) error
+	GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error)
+	UpdateByID(ctx context.Context, id string, updates *HumanInput) error
+	DeleteByID(ctx context.Context, id string) error
+}
+
+type HumanInput struct {
 	Name        string
 	Surname     string
 	Potronymic  string
-	Age         uint8
+	Age         string
 	Gender      string
 	Nationality string
-}
-
-type Human interface {
-	Create(ctx context.Context, body *CreateHuman, apiUrls config.ApiUrls) error
-	GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error)
-	DeleteByID(ctx context.Context, id string) error
 }
 
 type Dependencies struct {

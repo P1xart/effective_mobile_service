@@ -14,6 +14,21 @@ definitions:
     - name
     - surname
     type: object
+  github_com_P1xart_effective_mobile_service_internal_controller_v1_request.UpdateHuman:
+    properties:
+      age:
+        type: string
+      gender:
+        type: string
+      name:
+        type: string
+      nationality:
+        type: string
+      potronymic:
+        type: string
+      surname:
+        type: string
+    type: object
   github_com_P1xart_effective_mobile_service_internal_controller_v1_response.GetAllHumans:
     properties:
       humans:
@@ -27,9 +42,13 @@ definitions:
         type: string
       age:
         type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
       name:
         type: string
-      nationaly:
+      nationality:
         type: string
       potronymic:
         type: string
@@ -64,12 +83,12 @@ paths:
         name: nationaly
         type: string
       - default: 10
-        description: Максимальное количество возвращаемых машин
+        description: Максимальное количество возвращаемых людей
         in: query
         name: limit
         type: integer
       - default: 0
-        description: Число первых пропущенных возвращаемых машин
+        description: Число первых пропущенных возвращаемых людей
         in: query
         name: offset
         type: integer
@@ -99,6 +118,44 @@ paths:
         "201":
           description: Created
       summary: Создание нового человека
+      tags:
+      - люди
+  /v1/human/{id}:
+    delete:
+      description: Удалить человека по его идентификатору
+      parameters:
+      - description: Идентификатор человека
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Удалить человека по его идентификатору
+      tags:
+      - люди
+    patch:
+      consumes:
+      - application/json
+      description: Обновить человека по его идентификатору. Принимает JSON с обновленными
+        полями
+      parameters:
+      - description: Идентификатор человека
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Тело запроса
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_P1xart_effective_mobile_service_internal_controller_v1_request.UpdateHuman'
+      responses:
+        "204":
+          description: No Content
+      summary: Обновить человека по его идентификатору
       tags:
       - люди
 swagger: "2.0"

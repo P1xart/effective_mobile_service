@@ -56,14 +56,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "default": 10,
-                        "description": "Максимальное количество возвращаемых машин",
+                        "description": "Максимальное количество возвращаемых людей",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "default": 0,
-                        "description": "Число первых пропущенных возвращаемых машин",
+                        "description": "Число первых пропущенных возвращаемых людей",
                         "name": "offset",
                         "in": "query"
                     }
@@ -105,6 +105,62 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/human/{id}": {
+            "delete": {
+                "description": "Удалить человека по его идентификатору",
+                "tags": [
+                    "люди"
+                ],
+                "summary": "Удалить человека по его идентификатору",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор человека",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Обновить человека по его идентификатору. Принимает JSON с обновленными полями",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "люди"
+                ],
+                "summary": "Обновить человека по его идентификатору",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор человека",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Тело запроса",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_P1xart_effective_mobile_service_internal_controller_v1_request.UpdateHuman"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -129,6 +185,29 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_P1xart_effective_mobile_service_internal_controller_v1_request.UpdateHuman": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nationality": {
+                    "type": "string"
+                },
+                "potronymic": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_P1xart_effective_mobile_service_internal_controller_v1_response.GetAllHumans": {
             "type": "object",
             "properties": {
@@ -149,10 +228,16 @@ const docTemplate = `{
                 "age": {
                     "type": "integer"
                 },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
-                "nationaly": {
+                "nationality": {
                     "type": "string"
                 },
                 "potronymic": {

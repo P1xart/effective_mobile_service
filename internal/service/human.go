@@ -42,7 +42,7 @@ func NewHumanService(log *slog.Logger, humanRepo repo.Human, apiUrls *config.Api
 	}
 }
 
-func (s *HumanService) Create(ctx context.Context, body *CreateHuman, apiUrls config.ApiUrls) error {
+func (s *HumanService) Create(ctx context.Context, body *HumanInput, apiUrls config.ApiUrls) error {
 	ErrGroupCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -62,7 +62,8 @@ func (s *HumanService) Create(ctx context.Context, body *CreateHuman, apiUrls co
 					s.log.Error("failed to unmarshal age", logger.Error(err))
 					return err
 				}
-				body.Age = uint8(resp.Age)
+
+				body.Age = resp.Age
 				return nil
 			},
 		},
@@ -134,11 +135,17 @@ func (s *HumanService) Create(ctx context.Context, body *CreateHuman, apiUrls co
 		return err
 	}
 
-	err := s.humanRepo.Create(ctx, &entity.Human{
+	age, err := strconv.Atoi(body.Age)
+	if err != nil {
+		s.log.Debug("failed to parse age")
+		return err
+	}
+
+	err = s.humanRepo.Create(ctx, &entity.Human{
 		Name:        body.Name,
 		Surname:     body.Surname,
 		Potronymic:  body.Potronymic,
-		Age:         body.Age,
+		Age:         uint8(age),
 		Gender:      body.Gender,
 		Nationality: body.Nationality,
 	})
@@ -154,19 +161,37 @@ func (s *HumanService) GetAll(ctx context.Context, filters *entity.HumanFilters)
 }
 
 func (s *HumanService) DeleteByID(ctx context.Context, idStr string) error {
-    id, err := strconv.Atoi(idStr)
-    if err != nil {
-        s.log.Debug("failed to parse id")
-        return err
-    }
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		s.log.Debug("failed to parse id")
+		return err
+	}
 
 	if err = s.humanRepo.DeleteByID(ctx, id); err != nil {
-        if errors.Is(err, repoerrors.ErrNotFound) {
-            return ErrHumanNotFound
-        }
+		if errors.Is(err, repoerrors.ErrNotFound) {
+			return ErrHumanNotFound
+		}
 
-        return err
-    }
+		return err
+	}
 
-    return nil
+	return nil
+}
+
+func (s *HumanService) UpdateByID(ctx context.Context, idStr string, updates *HumanInput) error {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		s.log.Debug("failed to parse id")
+		return err
+	}
+
+	if err = s.humanRepo.DeleteByID(ctx, id); err != nil {
+		if errors.Is(err, repoerrors.ErrNotFound) {
+			return ErrHumanNotFound
+		}
+
+		return err
+	}
+
+	return nil
 }
