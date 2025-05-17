@@ -32,3 +32,15 @@ type Country struct {
 	CountryId   string  `json:"country_id"`
 	Probability float64 `json:"probability"`
 }
+
+type HumanFilters struct {
+	Limit  uint64
+	Offset uint64
+
+	AgeFrom   uint8
+	AgeTo     uint8
+	Gender    []string
+	Nationaly []string
+
+	QueryUrl string
+}

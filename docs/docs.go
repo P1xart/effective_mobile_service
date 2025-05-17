@@ -15,6 +15,69 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/human": {
+            "get": {
+                "description": "Получить всех людей",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "люди"
+                ],
+                "summary": "Получить всех людей",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Возраст от",
+                        "name": "age_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Возраст до",
+                        "name": "age_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Пол",
+                        "name": "gender",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Национальность",
+                        "name": "nationaly",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Максимальное количество возвращаемых машин",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Число первых пропущенных возвращаемых машин",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_P1xart_effective_mobile_service_internal_controller_v1_response.GetAllHumans"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/human/": {
             "post": {
                 "description": "Создание нового человека",
@@ -37,8 +100,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "201": {
+                        "description": "Created"
                     }
                 }
             }
@@ -65,13 +128,40 @@ const docTemplate = `{
                     "example": "Vasiliev"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
+        },
+        "github_com_P1xart_effective_mobile_service_internal_controller_v1_response.GetAllHumans": {
+            "type": "object",
+            "properties": {
+                "humans": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_P1xart_effective_mobile_service_internal_entity.Human"
+                    }
+                }
+            }
+        },
+        "github_com_P1xart_effective_mobile_service_internal_entity.Human": {
+            "type": "object",
+            "properties": {
+                "Gender": {
+                    "type": "string"
+                },
+                "age": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nationaly": {
+                    "type": "string"
+                },
+                "potronymic": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
         }
     }
 }`

@@ -4,9 +4,9 @@ import (
 	"log/slog"
 	"net/http"
 
-
 	"github.com/P1xart/effective_mobile_service/internal/config"
 	"github.com/P1xart/effective_mobile_service/internal/controller/v1/request"
+	"github.com/P1xart/effective_mobile_service/internal/controller/v1/response"
 	_ "github.com/P1xart/effective_mobile_service/internal/entity"
 	"github.com/P1xart/effective_mobile_service/internal/service"
 	"github.com/P1xart/effective_mobile_service/pkg/logger"
@@ -34,6 +34,7 @@ func newHumanRoutes(log *slog.Logger, g *gin.RouterGroup, humanService service.H
 	}
 
 	g.POST("/", r.createNewHuman)
+	g.GET("/", r.getHumans)
 }
 
 // @Summary Создание нового человека
@@ -63,7 +64,7 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 		return
 	}
 
-	err = r.humanService.CreateHuman(c, &service.CreateHuman{
+	err = r.humanService.Create(c, &service.CreateHuman{
 		Name: human.Name,
 		Surname: human.Surname,
 		Potronymic: human.Potronymic,
@@ -76,4 +77,38 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 	}
 
 	c.Status(http.StatusCreated)
+}
+
+// @Summary Получить всех людей
+// @Description Получить всех людей
+// @Tags люди
+// @Accept json
+// @Produce json
+// @Param age_from query string false "Возраст от"
+// @Param age_to query string false "Возраст до"
+// @Param gender query string false "Пол"
+// @Param nationaly query string false "Национальность"
+// @Param limit query int false "Максимальное количество возвращаемых машин" default(10)
+// @Param offset query int false "Число первых пропущенных возвращаемых машин" default(0)
+// @Success 200 {object} response.GetAllHumans
+// @Router /v1/human [get]
+func (r *humanRoutes) getHumans(c *gin.Context) {
+	filters := buildFilters(c)
+	if filters == nil {
+		return
+	}
+
+	humans, err := r.humanService.GetAll(c, filters)
+	if err != nil {
+		r.log.Error("failed to get all humans", logger.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, response.GetAllHumans{
+		Humans: humans,
+	})
 }

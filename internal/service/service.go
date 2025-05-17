@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/P1xart/effective_mobile_service/internal/config"
+	"github.com/P1xart/effective_mobile_service/internal/entity"
 	"github.com/P1xart/effective_mobile_service/internal/repo"
 )
 
@@ -19,7 +20,8 @@ type CreateHuman struct {
 }
 
 type Human interface {
-	CreateHuman(ctx context.Context, body *CreateHuman, apiUrls config.ApiUrls) error
+	Create(ctx context.Context, body *CreateHuman, apiUrls config.ApiUrls) error
+	GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error)
 }
 
 type Dependencies struct {

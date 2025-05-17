@@ -10,7 +10,8 @@ import (
 )
 
 type Human interface {
-	CreateHuman(ctx context.Context, body *entity.Human) error
+	Create(ctx context.Context, body *entity.Human) error
+	GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error)
 }
 
 type Repositories struct {

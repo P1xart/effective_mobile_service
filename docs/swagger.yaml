@@ -14,11 +14,75 @@ definitions:
     - name
     - surname
     type: object
+  github_com_P1xart_effective_mobile_service_internal_controller_v1_response.GetAllHumans:
+    properties:
+      humans:
+        items:
+          $ref: '#/definitions/github_com_P1xart_effective_mobile_service_internal_entity.Human'
+        type: array
+    type: object
+  github_com_P1xart_effective_mobile_service_internal_entity.Human:
+    properties:
+      Gender:
+        type: string
+      age:
+        type: integer
+      name:
+        type: string
+      nationaly:
+        type: string
+      potronymic:
+        type: string
+      surname:
+        type: string
+    type: object
 info:
   contact: {}
   title: CRM Backend API
   version: "1.0"
 paths:
+  /v1/human:
+    get:
+      consumes:
+      - application/json
+      description: Получить всех людей
+      parameters:
+      - description: Возраст от
+        in: query
+        name: age_from
+        type: string
+      - description: Возраст до
+        in: query
+        name: age_to
+        type: string
+      - description: Пол
+        in: query
+        name: gender
+        type: string
+      - description: Национальность
+        in: query
+        name: nationaly
+        type: string
+      - default: 10
+        description: Максимальное количество возвращаемых машин
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Число первых пропущенных возвращаемых машин
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_P1xart_effective_mobile_service_internal_controller_v1_response.GetAllHumans'
+      summary: Получить всех людей
+      tags:
+      - люди
   /v1/human/:
     post:
       consumes:
@@ -32,14 +96,9 @@ paths:
         schema:
           $ref: '#/definitions/github_com_P1xart_effective_mobile_service_internal_controller_v1_request.CreateHuman'
       responses:
-        "204":
-          description: No Content
+        "201":
+          description: Created
       summary: Создание нового человека
       tags:
       - люди
-securityDefinitions:
-  BearerAuth:
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

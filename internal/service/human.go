@@ -39,7 +39,7 @@ func NewHumanService(log *slog.Logger, humanRepo repo.Human, apiUrls *config.Api
 	}
 }
 
-func (s *HumanService) CreateHuman(ctx context.Context, body *CreateHuman, apiUrls config.ApiUrls) error {
+func (s *HumanService) Create(ctx context.Context, body *CreateHuman, apiUrls config.ApiUrls) error {
 	ErrGroupCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -131,7 +131,7 @@ func (s *HumanService) CreateHuman(ctx context.Context, body *CreateHuman, apiUr
 		return err
 	}
 
-	err := s.humanRepo.CreateHuman(ctx, &entity.Human{
+	err := s.humanRepo.Create(ctx, &entity.Human{
 		Name:       body.Name,
 		Surname:    body.Surname,
 		Potronymic: body.Potronymic,
@@ -144,4 +144,8 @@ func (s *HumanService) CreateHuman(ctx context.Context, body *CreateHuman, apiUr
 	}
 
 	return err
+}
+
+func (s *HumanService) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error) {
+    return s.humanRepo.GetAll(ctx, filters)
 }
