@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 
+	"github.com/P1xart/effective_mobile_service/internal/config"
 	"github.com/P1xart/effective_mobile_service/internal/controller/v1/request"
 	_ "github.com/P1xart/effective_mobile_service/internal/entity"
 	"github.com/P1xart/effective_mobile_service/internal/service"
@@ -66,7 +67,7 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 		Name: human.Name,
 		Surname: human.Surname,
 		Potronymic: human.Potronymic,
-	}); if err != nil {
+	}, config.ApiUrls{}); if err != nil {
 		r.log.Error("failed to create human", logger.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

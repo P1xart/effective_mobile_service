@@ -41,7 +41,7 @@ func Run() {
 	services := service.NewServices(&service.Dependencies{
 		Log:      log,
 		Repos:    repositories,
-	})
+	}, &cfg.API)
 
 	r := router()
 	v1.NewRouter(log, r, services)

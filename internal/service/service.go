@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/P1xart/effective_mobile_service/internal/config"
 	"github.com/P1xart/effective_mobile_service/internal/repo"
 )
 
@@ -18,7 +19,7 @@ type CreateHuman struct {
 }
 
 type Human interface {
-	CreateHuman(ctx context.Context, body *CreateHuman) error
+	CreateHuman(ctx context.Context, body *CreateHuman, apiUrls config.ApiUrls) error
 }
 
 type Dependencies struct {
@@ -33,9 +34,9 @@ type Services struct {
 	Human Human
 }
 
-func NewServices(deps *Dependencies) *Services {
+func NewServices(deps *Dependencies, apiUrls *config.ApiUrls) *Services {
 	services := &Services{
-		Human: NewHumanService(deps.Log, deps.Repos.Human),
+		Human: NewHumanService(deps.Log, deps.Repos.Human, apiUrls),
 	}
 
 	return services

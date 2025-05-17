@@ -22,10 +22,16 @@ func NewRepo(log *slog.Logger, pg *postgresql.Postgres) *Repo {
 }
 
 func (r *Repo) CreateHuman(ctx context.Context, body *entity.Human) error {
-	q := "INSERT INTO humans(name, surname, potronymic, age, gender, nationality) VALUES($1, $2, $3, $4, $5, $6)"
-	r.log.Info("init create human query", slog.String("query", q))
+	q, args, err := r.Builder.Insert("humans").Columns("name", "surname", "potronymic", "age", "gender", "nationality").
+	Values(body.Name, body.Surname, body.Potronymic, body.Age, body.Gender, body.Nationaly).ToSql()
+	if err != nil {
+		r.log.Error("failed to make query", logger.Error(err))
+		return err
+	}
+	
+	r.log.Info("create human query", slog.String("query", q))
 
-	_, err := r.Pool.Exec(ctx, q, body.Name, body.Surname, body.Potronymic, body.Age, body.Gender, body.Nationaly)
+	_, err = r.Pool.Exec(ctx, q, args...)
 	if err != nil {
 		r.log.Error("failed to insert new human", logger.Error(err))
 		return err

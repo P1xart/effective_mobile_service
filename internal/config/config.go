@@ -14,6 +14,7 @@ const defaultConfigFile = "config.yaml"
 type Config struct {
 	HTTP       HTTP       `yaml:"http"`
 	Postgresql Postgresql `yaml:"postgresql"`
+	API        ApiUrls    `yaml:"api"`
 }
 
 type HTTP struct {
@@ -31,9 +32,9 @@ type Postgresql struct {
 }
 
 type ApiUrls struct {
-	Age    string `yaml:"age_url" env:"" env-default:""`
-	Gender string `yaml:"gender_url" env:"" env-default:""`
-	Nation string `yaml:"nation_url" env:"" env-default:""`
+	Age    string `yaml:"age_url" env:"AGE_URL" env-default:"https://api.agify.io"`
+	Gender string `yaml:"gender_url" env:"GENDER_URL" env-default:"https://api.genderize.io"`
+	Nation string `yaml:"nation_url" env:"NATION_URL" env-default:"https://api.nationalize.io"`
 }
 
 func New(log *slog.Logger) (*Config, error) {
