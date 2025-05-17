@@ -1,12 +1,16 @@
 package entity
 
+import "time"
+
 type Human struct {
-	Name       string `json:"name" db:"name"`
-	Surname    string `json:"surname" db:"surname"`
-	Potronymic string `json:"potronymic,omitempty" db:"potronymic"`
-	Age        uint8  `json:"age" db:"age"`
-	Gender     string `json:"Gender" db:"gender"`
-	Nationaly  string `json:"nationaly" db:"nationaly"`
+	ID          int       `json:"id" db:"id"`
+	Name        string    `json:"name" db:"name"`
+	Surname     string    `json:"surname" db:"surname"`
+	Potronymic  string    `json:"potronymic,omitempty" db:"potronymic"`
+	Age         uint8     `json:"age" db:"age"`
+	Gender      string    `json:"Gender" db:"gender"`
+	Nationality string    `json:"nationality" db:"nationality"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 }
 
 type AgeResp struct {

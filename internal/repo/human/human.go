@@ -26,7 +26,7 @@ func NewRepo(log *slog.Logger, pg *postgresql.Postgres) *Repo {
 
 func (r *Repo) Create(ctx context.Context, body *entity.Human) error {
 	q, args, err := r.Builder.Insert("humans").Columns("name", "surname", "potronymic", "age", "gender", "nationality").
-	Values(body.Name, body.Surname, body.Potronymic, body.Age, body.Gender, body.Nationaly).ToSql()
+	Values(body.Name, body.Surname, body.Potronymic, body.Age, body.Gender, body.Nationality).ToSql()
 	if err != nil {
 		r.log.Error("failed to make query", logger.Error(err))
 		return err

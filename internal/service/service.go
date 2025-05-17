@@ -11,12 +11,12 @@ import (
 )
 
 type CreateHuman struct {
-	Name       string
-	Surname    string
-	Potronymic string
-	Age        uint8
-	Gender     string
-	Nationaly  string
+	Name        string
+	Surname     string
+	Potronymic  string
+	Age         uint8
+	Gender      string
+	Nationality string
 }
 
 type Human interface {

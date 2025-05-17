@@ -33,7 +33,7 @@ func NewHumanService(log *slog.Logger, humanRepo repo.Human, apiUrls *config.Api
 	return &HumanService{
 		log:        log,
 		httpClient: client,
-        apiUrls: apiUrls,
+		apiUrls:    apiUrls,
 
 		humanRepo: humanRepo,
 	}
@@ -86,10 +86,10 @@ func (s *HumanService) Create(ctx context.Context, body *CreateHuman, apiUrls co
 					return err
 				}
 				if len(resp.Country) == 0 {
-					body.Nationaly = ""
+					body.Nationality = ""
 					return nil
 				}
-				body.Nationaly = resp.Country[0].CountryId
+				body.Nationality = resp.Country[0].CountryId
 				return nil
 			},
 		},
@@ -132,12 +132,12 @@ func (s *HumanService) Create(ctx context.Context, body *CreateHuman, apiUrls co
 	}
 
 	err := s.humanRepo.Create(ctx, &entity.Human{
-		Name:       body.Name,
-		Surname:    body.Surname,
-		Potronymic: body.Potronymic,
-		Age:        body.Age,
-		Gender:     body.Gender,
-		Nationaly:  body.Nationaly,
+		Name:        body.Name,
+		Surname:     body.Surname,
+		Potronymic:  body.Potronymic,
+		Age:         body.Age,
+		Gender:      body.Gender,
+		Nationality: body.Nationality,
 	})
 	if err != nil {
 		s.log.Error("failed to create human", logger.Error(err))
@@ -147,5 +147,5 @@ func (s *HumanService) Create(ctx context.Context, body *CreateHuman, apiUrls co
 }
 
 func (s *HumanService) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error) {
-    return s.humanRepo.GetAll(ctx, filters)
+	return s.humanRepo.GetAll(ctx, filters)
 }
