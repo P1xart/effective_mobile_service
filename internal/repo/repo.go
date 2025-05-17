@@ -12,6 +12,7 @@ import (
 type Human interface {
 	Create(ctx context.Context, body *entity.Human) error
 	GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error)
+	DeleteByID(ctx context.Context, id int) error
 }
 
 type Repositories struct {

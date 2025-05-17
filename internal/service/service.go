@@ -22,6 +22,7 @@ type CreateHuman struct {
 type Human interface {
 	Create(ctx context.Context, body *CreateHuman, apiUrls config.ApiUrls) error
 	GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error)
+	DeleteByID(ctx context.Context, id string) error
 }
 
 type Dependencies struct {

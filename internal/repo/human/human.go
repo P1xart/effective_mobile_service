@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/P1xart/effective_mobile_service/internal/entity"
+	"github.com/P1xart/effective_mobile_service/internal/repo/repoerrors"
 	"github.com/P1xart/effective_mobile_service/pkg/logger"
 	"github.com/P1xart/effective_mobile_service/pkg/postgresql"
 
@@ -89,4 +90,27 @@ func (r *Repo) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]enti
 	}
 
 	return humans, nil
+}
+
+func (r *Repo) DeleteByID(ctx context.Context, id int) error {
+	q, args, err := r.Builder.Delete("humans").Where(squirrel.Eq{"id": id}).ToSql()
+	if err != nil {
+		r.log.Error("failed to make query", logger.Error(err))
+		return err
+	}
+	
+	r.log.Info("delete human by id query", slog.String("query", q))
+
+	result, err := r.Pool.Exec(ctx, q, args...)
+	if err != nil {
+		r.log.Error("failed to delete human by id", slog.Any("id", id), logger.Error(err))
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		r.log.Warn("no human found with the given ID to delete", slog.Any("id", id))
+		return repoerrors.ErrNotFound
+	}
+
+	return nil
 }

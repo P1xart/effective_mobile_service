@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -14,6 +16,7 @@ import (
 	"github.com/P1xart/effective_mobile_service/internal/config"
 	"github.com/P1xart/effective_mobile_service/internal/entity"
 	"github.com/P1xart/effective_mobile_service/internal/repo"
+	"github.com/P1xart/effective_mobile_service/internal/repo/repoerrors"
 	"github.com/P1xart/effective_mobile_service/pkg/logger"
 )
 
@@ -148,4 +151,22 @@ func (s *HumanService) Create(ctx context.Context, body *CreateHuman, apiUrls co
 
 func (s *HumanService) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error) {
 	return s.humanRepo.GetAll(ctx, filters)
+}
+
+func (s *HumanService) DeleteByID(ctx context.Context, idStr string) error {
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        s.log.Debug("failed to parse id")
+        return err
+    }
+
+	if err = s.humanRepo.DeleteByID(ctx, id); err != nil {
+        if errors.Is(err, repoerrors.ErrNotFound) {
+            return ErrHumanNotFound
+        }
+
+        return err
+    }
+
+    return nil
 }
