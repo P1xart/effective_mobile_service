@@ -8,7 +8,7 @@ run: build
 
 .PHONY: docs
 docs:
-	swag init -g ./app/main.go -o ./docs --parseDependency --parseInternal
+	swag init -g .cmd/app/main.go -o ./docs --parseDependency --parseInternal
 
 .PHONY: gen
 gen: mock docs
@@ -28,11 +28,3 @@ migrate:
 .PHONY: compose-migrate
 compose-migrate:
 	docker compose up --build migrations
-
-.PHONY: init-platform-submodule
-init-platform-submodule:
-	git submodule update --init --remote platform
-
-.PHONY: update-platform-submodule
-update-platform-submodule:
-	git submodule update --remote platform

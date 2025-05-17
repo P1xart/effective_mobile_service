@@ -14,7 +14,6 @@ import (
 )
 
 func NewRouter(log *slog.Logger, router *gin.Engine, services *service.Services) {
-	router.Use(middleware.CORS(log))
 	router.Use(middleware.Log(log))
 
 	router.GET("/health", func(c *gin.Context) {

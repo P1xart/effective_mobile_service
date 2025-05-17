@@ -30,6 +30,12 @@ type Postgresql struct {
 	SSLMode  string `yaml:"ssl_mode" env:"PG_SSL" env-default:"disable"`
 }
 
+type ApiUrls struct {
+	Age    string `yaml:"age_url" env:"" env-default:""`
+	Gender string `yaml:"gender_url" env:"" env-default:""`
+	Nation string `yaml:"nation_url" env:"" env-default:""`
+}
+
 func New(log *slog.Logger) (*Config, error) {
 	path := fetchConfigPath()
 

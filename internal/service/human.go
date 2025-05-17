@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 	"log/slog"
 	"net/http"
 	"encoding/json"
-	"sync"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/P1xart/effective_mobile_service/internal/entity"
 	"github.com/P1xart/effective_mobile_service/internal/repo"
@@ -35,66 +36,96 @@ func NewHumanService(log *slog.Logger, humanRepo repo.Human) *HumanService {
 }
 
 func (s *HumanService) CreateHuman(ctx context.Context, body *CreateHuman) error {
-	wg := sync.WaitGroup{}
-	errChan := make(chan error, 1)
-	defer close(errChan)
+	ErrGroupCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+    defer cancel()
 
-	for i := range(3) {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+    g, ErrGroupCtx := errgroup.WithContext(ErrGroupCtx)
 
-			var apiUrl string
-			switch i {
-			case 0: apiUrl = fmt.Sprintf("https://api.agify.io/?name=%s", body.Name)
-			case 1: apiUrl = fmt.Sprintf("https://api.genderize.io/?name=%s", body.Name)
-			case 2: apiUrl = fmt.Sprintf("https://api.nationalize.io/?name=%s", body.Name)
-			}
-	
-			resp, err := http.Get(apiUrl)
-			if err != nil {
-				s.log.Error("failed get age from api", slog.String("api", apiUrl), logger.Error(err))
-				errChan <- err
-				return
-			}
-			defer resp.Body.Close()
-			
-			respBody, err := io.ReadAll(resp.Body)
-			if err != nil {
-				s.log.Error("failed read response of body", slog.String("api", apiUrl), logger.Error(err))
-				errChan <- err
-				return
-			}
-	
-			switch i {
-			case 0: 
-				var AgeResp entity.AgeResp
-				err = json.Unmarshal(respBody, &AgeResp)
-				body.Age = uint8(AgeResp.Age)
-			case 1:
-				var GenderResp entity.GenderResp
-				err = json.Unmarshal(respBody, &GenderResp)
-				body.Gender = GenderResp.Gender
-			case 2:
-				var NationalyResp entity.NationalyResp
-				err = json.Unmarshal(respBody, &NationalyResp)
-				body.Nationaly = NationalyResp.Country[0].CountryId
-			}
-			if err != nil {
-				s.log.Error("failed to unmarshalling response", logger.Error(err))
-				errChan <- err
-				return
-			}
+    tasks := []struct {
+        name    string
+        url     string
+        handler func([]byte) error
+    }{
+        {
+            name: "age",
+            url:  fmt.Sprintf("https://api.agify.io/?name=%s", body.Name),
+            handler: func(data []byte) error {
+                var resp entity.AgeResp
+                if err := json.Unmarshal(data, &resp); err != nil {
+					s.log.Error("failed to unmarshal age", logger.Error(err))
+                    return err
+                }
+                body.Age = uint8(resp.Age)
+                return nil
+            },
+        },
+        {
+            name: "gender",
+            url:  fmt.Sprintf("https://api.genderize.io/?name=%s", body.Name),
+            handler: func(data []byte) error {
+                var resp entity.GenderResp
+                if err := json.Unmarshal(data, &resp); err != nil {
+                    s.log.Error("failed to unmarshal gender", logger.Error(err))
+                    return err
+                }
+                body.Gender = resp.Gender
+                return nil
+            },
+        },
+        {
+            name: "nationality",
+            url:  fmt.Sprintf("https://api.nationalize.io/?name=%s", body.Name),
+            handler: func(data []byte) error {
+                var resp entity.NationalyResp
+                if err := json.Unmarshal(data, &resp); err != nil {
+                    s.log.Error("failed to unmarshal nationality", logger.Error(err))
+                    return err
+                }
+                if len(resp.Country) == 0 {
+                    body.Nationaly = ""
+					return nil
+                }
+                body.Nationaly = resp.Country[0].CountryId
+                return nil
+            },
+        },
+    }
 
-			errChan <- nil
-		}()
-	}
-	
-	wg.Wait()
-	if err := <- errChan; err != nil {
-		s.log.Error("failed to make query on api", logger.Error(err))
+    for _, task := range tasks {
+        task := task
+        g.Go(func() error {
+            req, err := http.NewRequestWithContext(ErrGroupCtx, "GET", task.url, nil)
+            if err != nil {
+                s.log.Error("failed to make request", slog.String("query", task.name), logger.Error(err))
+				return err
+            }
+
+            resp, err := http.DefaultClient.Do(req)
+            if err != nil {
+                s.log.Error("failed to do request", slog.String("query", task.name), logger.Error(err))
+				return err
+            }
+            defer resp.Body.Close()
+
+            data, err := io.ReadAll(resp.Body)
+            if err != nil {
+                s.log.Error("failed to read response body", slog.String("query", task.name), logger.Error(err))
+				return err
+            }
+
+            if err := task.handler(data); err != nil {
+                s.log.Error("failed to use handler", slog.String("query", task.name), logger.Error(err))
+				return err
+            }
+
+            return nil
+        })
+    }
+
+    if err := g.Wait(); err != nil {
+        s.log.Error("failed to get user data from api", logger.Error(err))
 		return err
-	}
+    }
 
 	err := s.humanRepo.CreateHuman(ctx, &entity.Human{
 		Name: body.Name,

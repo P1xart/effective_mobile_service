@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o bin app/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o bin cmd/app/main.go
 
 FROM alpine AS runner
 
