@@ -185,7 +185,23 @@ func (s *HumanService) UpdateByID(ctx context.Context, idStr string, updates *Hu
 		return err
 	}
 
-	if err = s.humanRepo.DeleteByID(ctx, id); err != nil {
+    var age int
+    if updates.Age != "" {
+        age, err = strconv.Atoi(updates.Age)
+        if err != nil {
+            s.log.Debug("failed to parse age")
+            return err
+        }
+    }
+
+	if err = s.humanRepo.UpdateByID(ctx, id, &entity.Human{
+        Name: updates.Name,
+        Surname: updates.Surname,
+        Potronymic: updates.Potronymic,
+        Age: uint8(age),
+        Gender: updates.Gender,
+        Nationality: updates.Nationality,
+    }); err != nil {
 		if errors.Is(err, repoerrors.ErrNotFound) {
 			return ErrHumanNotFound
 		}
