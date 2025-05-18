@@ -3,15 +3,15 @@
 ## Запуск
 Если сервис запускается впервые, нужно запустить миграции
 ```
-    docker compose down -v # Только вперые, для очистки данных докера
-    docker compose up postgres
-    make compose-migrations
+docker compose down -v # Только вперые, для очистки данных докера
+docker compose up postgres
+make compose-migrate
 ```
 Запустить сервис можно с помощью команды
 ```
-  make prod
-    # или
-  docker compose up --build
+make prod
+# или
+docker compose up --build
 ```
 Это запустит базу данных и сам сервис.
 
