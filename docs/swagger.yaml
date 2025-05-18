@@ -17,16 +17,22 @@ definitions:
   github_com_P1xart_effective_mobile_service_internal_controller_v1_request.UpdateHuman:
     properties:
       age:
-        type: string
+        example: 22
+        type: integer
       gender:
+        example: male
         type: string
       name:
+        example: Igor
         type: string
       nationality:
+        example: US
         type: string
       potronymic:
+        example: Igorevich
         type: string
       surname:
+        example: Igorev
         type: string
     type: object
   github_com_P1xart_effective_mobile_service_internal_controller_v1_response.GetAllHumans:
@@ -45,7 +51,7 @@ definitions:
       created_at:
         type: string
       id:
-        type: integer
+        type: string
       name:
         type: string
       nationality:
@@ -57,7 +63,7 @@ definitions:
     type: object
 info:
   contact: {}
-  title: CRM Backend API
+  title: Тестовое
   version: "1.0"
 paths:
   /v1/human:
@@ -83,12 +89,12 @@ paths:
         name: nationaly
         type: string
       - default: 10
-        description: Максимальное количество возвращаемых людей
+        description: Limit
         in: query
         name: limit
         type: integer
       - default: 0
-        description: Число первых пропущенных возвращаемых людей
+        description: Offset
         in: query
         name: offset
         type: integer
@@ -117,6 +123,8 @@ paths:
       responses:
         "201":
           description: Created
+          schema:
+            $ref: '#/definitions/github_com_P1xart_effective_mobile_service_internal_entity.Human'
       summary: Создание нового человека
       tags:
       - люди
@@ -153,8 +161,10 @@ paths:
         schema:
           $ref: '#/definitions/github_com_P1xart_effective_mobile_service_internal_controller_v1_request.UpdateHuman'
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_P1xart_effective_mobile_service_internal_entity.Human'
       summary: Обновить человека по его идентификатору
       tags:
       - люди

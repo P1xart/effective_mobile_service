@@ -27,15 +27,15 @@ func TestHumanService_Create(t *testing.T) {
 
 	ctx := context.Background()
 
-	expectedHuman := &HumanInput{
+	expectedHuman1 := &HumanInput{
 		Name: "Mihail",
 		Surname: "Dmitrievich",
 	}
 
-	human, err := humanService.Create(ctx, expectedHuman)
+	human, err := humanService.Create(ctx, expectedHuman1)
 	require.NoError(t, err)
-	require.Equal(t, human.Name, expectedHuman.Name)
-	require.Equal(t, human.Surname, expectedHuman.Surname)
+	require.Equal(t, human.Name, expectedHuman1.Name)
+	require.Equal(t, human.Surname, expectedHuman1.Surname)
 }
 
 func TestHumanService_GetAll(t *testing.T) {
@@ -58,8 +58,11 @@ func TestHumanService_GetAll(t *testing.T) {
 
 	_, err := humanService.Create(ctx, expectedHuman)
 	require.NoError(t, err)
-	_, err = humanService.GetAll(ctx, &entity.HumanFilters{})
+	humans, err := humanService.GetAll(ctx, &entity.HumanFilters{Limit: 10, Offset: 0})
 	require.NoError(t, err)
+	require.Equal(t, expectedHuman.Age, humans[0].Age)
+	require.Equal(t, expectedHuman.Name, humans[0].Name)
+	require.Equal(t, expectedHuman.Nationality, humans[0].Nationality)
 }
 
 func TestHumanService_UpdateByID(t *testing.T) {
@@ -120,7 +123,7 @@ func TestHumanService_Delete(t *testing.T) {
 	require.NoError(t, err)
 	err = humanService.DeleteByID(ctx, human.ID)
 	require.NoError(t, err)
-	getHuman, err := humanService.GetAll(ctx, &entity.HumanFilters{})
+	getHuman, err := humanService.GetAll(ctx, &entity.HumanFilters{Limit: 10, Offset: 0})
 	require.NoError(t, err)
 	require.Len(t, getHuman, 0)
 }

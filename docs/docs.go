@@ -56,14 +56,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "default": 10,
-                        "description": "Максимальное количество возвращаемых людей",
+                        "description": "Limit",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "default": 0,
-                        "description": "Число первых пропущенных возвращаемых людей",
+                        "description": "Offset",
                         "name": "offset",
                         "in": "query"
                     }
@@ -101,7 +101,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_P1xart_effective_mobile_service_internal_entity.Human"
+                        }
                     }
                 }
             }
@@ -156,8 +159,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_P1xart_effective_mobile_service_internal_entity.Human"
+                        }
                     }
                 }
             }
@@ -189,22 +195,28 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "age": {
-                    "type": "string"
+                    "type": "integer",
+                    "example": 22
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "male"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Igor"
                 },
                 "nationality": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "US"
                 },
                 "potronymic": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Igorevich"
                 },
                 "surname": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Igorev"
                 }
             }
         },
@@ -232,7 +244,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -257,7 +269,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "CRM Backend API",
+	Title:            "Тестовое",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

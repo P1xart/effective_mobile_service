@@ -11,6 +11,7 @@ type Human struct {
 	Gender      string    `json:"Gender" db:"gender"`
 	Nationality string    `json:"nationality" db:"nationality"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type AgeResp struct {

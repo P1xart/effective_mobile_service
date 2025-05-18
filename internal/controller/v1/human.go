@@ -96,8 +96,8 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 // @Param age_to query string false "Возраст до"
 // @Param gender query string false "Пол"
 // @Param nationaly query string false "Национальность"
-// @Param limit query int false default(10)
-// @Param offset query int false default(0)
+// @Param limit query int false "Limit" default(10)
+// @Param offset query int false "Offset" default(0)
 // @Success 200 {object} response.GetAllHumans
 // @Router /v1/human [get]
 func (r *humanRoutes) getHumans(c *gin.Context) {

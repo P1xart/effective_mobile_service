@@ -63,4 +63,8 @@ PG_PORT
 PG_DATABASE
 PG_SSL
 PG_AUTO_CREATE
+AGE_URL
+GENDER_URL
+NATION_URL
 ```
+Перменные содержащие URL в конце предполагают внешние API, которые обогащают полученные данные для базы данных

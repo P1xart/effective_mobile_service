@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "CRM Backend API",
+        "title": "Тестовое",
         "contact": {},
         "version": "1.0"
     },
@@ -47,14 +47,14 @@
                     {
                         "type": "integer",
                         "default": 10,
-                        "description": "Максимальное количество возвращаемых людей",
+                        "description": "Limit",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "default": 0,
-                        "description": "Число первых пропущенных возвращаемых людей",
+                        "description": "Offset",
                         "name": "offset",
                         "in": "query"
                     }
@@ -92,7 +92,10 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_P1xart_effective_mobile_service_internal_entity.Human"
+                        }
                     }
                 }
             }
@@ -147,8 +150,11 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_P1xart_effective_mobile_service_internal_entity.Human"
+                        }
                     }
                 }
             }
@@ -180,22 +186,28 @@
             "type": "object",
             "properties": {
                 "age": {
-                    "type": "string"
+                    "type": "integer",
+                    "example": 22
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "male"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Igor"
                 },
                 "nationality": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "US"
                 },
                 "potronymic": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Igorevich"
                 },
                 "surname": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Igorev"
                 }
             }
         },
@@ -223,7 +235,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
