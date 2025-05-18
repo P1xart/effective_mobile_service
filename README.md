@@ -1,11 +1,12 @@
 # Тестовое задание в Effective Mobile
 
-Build Status
-
+## Запуск
 Запустить сервис можно с помощью команды
+```
   make prod
 # или
   docker compose up --build
+```
 Это запустит базу данных, миграции и сам сервис.
 
 Документацию после запуска сервиса можно посмотреть по адресу http://localhost:8080/swagger/index.html с портом 8080 по умолчанию
@@ -13,16 +14,18 @@ Build Status
 Перед запуском интеграционных тестов нужно запустить сервис командой выше и не выключать его до конца тестирования. При этом вы должны быть в корне проекта
 
 Запуск интеграционных тестов
-
+```
   make integration-test
+```
 
-Configuration
+## Configuration
 
 Сконфигурировать приложение можно используя config.yaml, указав путь до файла в переменной CONFIG_PATH
 example
-
+```
   export CONFIG_PATH=config/config.yaml
-
+```
+```
 http:
   host: localhost
   port: 8080
@@ -34,15 +37,15 @@ postgresql:
   database: postgres
   ssl_mode: disable
   auto_create: false
-
+```
 вместе с файлом приложение можно настроить используя перемнные окружения
-
+```
     CONFIG_PATH=path - настройка расположения yaml конфиг файла; дефолт значение = "config.yaml"
     APP_ENV=prod/dev - настройка окружения приложения
     LOG_LEVEL=debug/info/warn/error - настройка уровня логирования; дефолт значение = "debug"
-
+```
 для всех полей из yaml файла есть переменные окружения для конфигурации
-
+```
     PORT
     HOST
     PG_USER
@@ -52,3 +55,4 @@ postgresql:
     PG_DATABASE
     PG_SSL
     PG_AUTO_CREATE
+```
