@@ -2,6 +2,7 @@ package human
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/P1xart/effective_mobile_service/internal/entity"
@@ -41,7 +42,8 @@ func (r *Repo) Create(ctx context.Context, body *entity.Human) (*entity.Human, e
 		&body.Gender,
 		&body.Nationality,
 	); err != nil {
-		r.log.Error("failed to create human", logger.Error(err))
+		r.log.Error("failed to scan returning values after creating human", logger.Error(err))
+		return nil, err
 	}
 
 	return body, nil
@@ -89,10 +91,9 @@ func (r *Repo) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]enti
 	humans, err := pgx.CollectRows(rows, pgx.RowToStructByName[entity.Human])
 	if err != nil {
 		r.log.Error("failed to collect rows", logger.Error(err))
-		return nil, err
 	}
 
-	return humans, nil
+	return humans, err
 }
 
 func (r *Repo) UpdateByID(ctx context.Context, id string, updates *entity.Human) (*entity.Human, error) {
@@ -136,7 +137,13 @@ func (r *Repo) UpdateByID(ctx context.Context, id string, updates *entity.Human)
 		&updates.Gender,
 		&updates.Nationality,
 	); err != nil {
-		r.log.Error("failed to create human", logger.Error(err))
+		if errors.Is(err, pgx.ErrNoRows) {
+			r.log.Error("no human for update", logger.Error(err))
+			return nil, repoerrors.ErrNotFound
+		}
+
+		r.log.Error("failed to scan returning values after updating human", logger.Error(err))
+		return nil, err
 	}
 
 	r.log.Debug("update rows successfuly")
@@ -160,7 +167,7 @@ func (r *Repo) DeleteByID(ctx context.Context, id string) error {
 	}
 
 	if result.RowsAffected() == 0 {
-		r.log.Warn("no human found with the given ID to delete", slog.Any("id", id))
+		r.log.Error("no human found with the given ID to delete", slog.Any("id", id))
 		return repoerrors.ErrNotFound
 	}
 

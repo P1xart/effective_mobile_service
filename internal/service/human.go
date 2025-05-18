@@ -42,10 +42,8 @@ func NewHumanService(log *slog.Logger, humanRepo repo.Human, apiUrls *config.Api
 }
 
 func (s *HumanService) Create(ctx context.Context, body *HumanInput) (*entity.Human, error) {
-	err := s.fillUserData(ctx, body)
-	if err != nil {
+	if err := s.fillUserData(ctx, body); err != nil {
 		s.log.Error("failed to fill user data from api", logger.Error(err))
-		return nil, err
 	}
 
 	human, err := s.humanRepo.Create(ctx, &entity.Human{
@@ -69,15 +67,14 @@ func (s *HumanService) GetAll(ctx context.Context, filters *entity.HumanFilters)
 }
 
 func (s *HumanService) DeleteByID(ctx context.Context, id string) error {
-	if err := s.humanRepo.DeleteByID(ctx, id); err != nil {
+	err := s.humanRepo.DeleteByID(ctx, id)
+	if err != nil {
 		if errors.Is(err, repoerrors.ErrNotFound) {
 			return ErrHumanNotFound
 		}
-
-		return err
 	}
 
-	return nil
+	return err
 }
 
 func (s *HumanService) UpdateByID(ctx context.Context, id string, updates *HumanInput) (*entity.Human, error) {
@@ -120,6 +117,10 @@ func (s *HumanService) fillUserData(ctx context.Context, body *HumanInput) error
 					s.log.Error("failed to unmarshal age", logger.Error(err))
 					return err
 				}
+				if resp.Age == 0 {
+					s.log.Error("failed to get age")
+					return ErrInvalidAge
+				}
 
 				body.Age = resp.Age
 				return nil
@@ -134,6 +135,11 @@ func (s *HumanService) fillUserData(ctx context.Context, body *HumanInput) error
 					s.log.Error("failed to unmarshal gender", logger.Error(err))
 					return err
 				}
+				if len(resp.Gender) == 0 {
+					s.log.Error("failed to get gender")
+					return ErrInvalidGender
+				}
+
 				body.Gender = resp.Gender
 				return nil
 			},
@@ -148,9 +154,9 @@ func (s *HumanService) fillUserData(ctx context.Context, body *HumanInput) error
 					return err
 				}
 				if len(resp.Country) == 0 {
-					body.Nationality = ""
-					return nil
+					return ErrInvalidNationality
 				}
+				
 				body.Nationality = resp.Country[0].CountryId
 				return nil
 			},
@@ -166,7 +172,7 @@ func (s *HumanService) fillUserData(ctx context.Context, body *HumanInput) error
 				return err
 			}
 
-			resp, err := http.DefaultClient.Do(req)
+			resp, err := s.httpClient.Do(req)
 			if err != nil {
 				s.log.Error("failed to do request", slog.String("query", task.name), logger.Error(err))
 				return err
@@ -188,10 +194,9 @@ func (s *HumanService) fillUserData(ctx context.Context, body *HumanInput) error
 		})
 	}
 
-	if err := g.Wait(); err != nil {
+	err := g.Wait()
+	if err != nil {
 		s.log.Error("failed to get user data from api", logger.Error(err))
-		return err
 	}
-
-    return nil
+	return err
 }
