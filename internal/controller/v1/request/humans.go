@@ -7,10 +7,10 @@ type CreateHuman struct {
 }
 
 type UpdateHuman struct {
-	Name        string `json:"name"`
-	Surname     string `json:"surname"`
-	Potronymic  string `json:"potronymic"`
-	Age         string `json:"age"`
-	Gender      string `json:"gender"`
-	Nationality string `json:"nationality"`
+	Name        string `json:"name,omitempty" example:"Igor"`
+	Surname     string `json:"surname,omitempty" example:"Igorev"`
+	Potronymic  string `json:"potronymic,omitempty" example:"Igorevich"`
+	Age         int    `json:"age,omitempty" example:"22"`
+	Gender      string `json:"gender,omitempty" example:"male"`
+	Nationality string `json:"nationality,omitempty" example:"US"`
 }

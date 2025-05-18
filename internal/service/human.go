@@ -8,7 +8,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -22,7 +21,7 @@ import (
 
 type HumanService struct {
 	log        *slog.Logger
-	httpClient http.Client
+	httpClient *http.Client
 
 	apiUrls   *config.ApiUrls
 	humanRepo repo.Human
@@ -31,7 +30,7 @@ type HumanService struct {
 func NewHumanService(log *slog.Logger, humanRepo repo.Human, apiUrls *config.ApiUrls) *HumanService {
 	log = log.With(slog.String("component", "human service"))
 
-	client := http.Client{}
+	client := http.DefaultClient
 
 	return &HumanService{
 		log:        log,
@@ -42,11 +41,68 @@ func NewHumanService(log *slog.Logger, humanRepo repo.Human, apiUrls *config.Api
 	}
 }
 
-func (s *HumanService) Create(ctx context.Context, body *HumanInput, apiUrls config.ApiUrls) error {
-	ErrGroupCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func (s *HumanService) Create(ctx context.Context, body *HumanInput) error {
+	err := s.fillUserData(ctx, body)
+	if err != nil {
+		s.log.Error("failed to fill user data from api", logger.Error(err))
+		return err
+	}
+
+	if err = s.humanRepo.Create(ctx, &entity.Human{
+		Name:        body.Name,
+		Surname:     body.Surname,
+		Potronymic:  body.Potronymic,
+		Age:         body.Age,
+		Gender:      body.Gender,
+		Nationality: body.Nationality,
+	}); err != nil {
+		s.log.Error("failed to create human", logger.Error(err))
+        return err
+	}
+
+	return nil
+}
+
+func (s *HumanService) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error) {
+	return s.humanRepo.GetAll(ctx, filters)
+}
+
+func (s *HumanService) DeleteByID(ctx context.Context, id string) error {
+	if err := s.humanRepo.DeleteByID(ctx, id); err != nil {
+		if errors.Is(err, repoerrors.ErrNotFound) {
+			return ErrHumanNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (s *HumanService) UpdateByID(ctx context.Context, id string, updates *HumanInput) error {
+	if err := s.humanRepo.UpdateByID(ctx, id, &entity.Human{
+		Name:        updates.Name,
+		Surname:     updates.Surname,
+		Potronymic:  updates.Potronymic,
+		Age:         updates.Age,
+		Gender:      updates.Gender,
+		Nationality: updates.Nationality,
+	}); err != nil {
+		if errors.Is(err, repoerrors.ErrNotFound) {
+			return ErrHumanNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (s *HumanService) fillUserData(ctx context.Context, body *HumanInput) error {
+    groupCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	g, ErrGroupCtx := errgroup.WithContext(ErrGroupCtx)
+	g, groupCtx := errgroup.WithContext(groupCtx)
 
 	tasks := []struct {
 		name    string
@@ -102,7 +158,7 @@ func (s *HumanService) Create(ctx context.Context, body *HumanInput, apiUrls con
 	for _, task := range tasks {
 		task := task
 		g.Go(func() error {
-			req, err := http.NewRequestWithContext(ErrGroupCtx, "GET", task.url, nil)
+			req, err := http.NewRequestWithContext(groupCtx, "GET", task.url, nil)
 			if err != nil {
 				s.log.Error("failed to make request", slog.String("query", task.name), logger.Error(err))
 				return err
@@ -135,79 +191,5 @@ func (s *HumanService) Create(ctx context.Context, body *HumanInput, apiUrls con
 		return err
 	}
 
-	age, err := strconv.Atoi(body.Age)
-	if err != nil {
-		s.log.Debug("failed to parse age")
-		return err
-	}
-
-	err = s.humanRepo.Create(ctx, &entity.Human{
-		Name:        body.Name,
-		Surname:     body.Surname,
-		Potronymic:  body.Potronymic,
-		Age:         uint8(age),
-		Gender:      body.Gender,
-		Nationality: body.Nationality,
-	})
-	if err != nil {
-		s.log.Error("failed to create human", logger.Error(err))
-	}
-
-	return err
-}
-
-func (s *HumanService) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error) {
-	return s.humanRepo.GetAll(ctx, filters)
-}
-
-func (s *HumanService) DeleteByID(ctx context.Context, idStr string) error {
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		s.log.Debug("failed to parse id")
-		return err
-	}
-
-	if err = s.humanRepo.DeleteByID(ctx, id); err != nil {
-		if errors.Is(err, repoerrors.ErrNotFound) {
-			return ErrHumanNotFound
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-func (s *HumanService) UpdateByID(ctx context.Context, idStr string, updates *HumanInput) error {
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		s.log.Debug("failed to parse id")
-		return err
-	}
-
-    var age int
-    if updates.Age != "" {
-        age, err = strconv.Atoi(updates.Age)
-        if err != nil {
-            s.log.Debug("failed to parse age")
-            return err
-        }
-    }
-
-	if err = s.humanRepo.UpdateByID(ctx, id, &entity.Human{
-        Name: updates.Name,
-        Surname: updates.Surname,
-        Potronymic: updates.Potronymic,
-        Age: uint8(age),
-        Gender: updates.Gender,
-        Nationality: updates.Nationality,
-    }); err != nil {
-		if errors.Is(err, repoerrors.ErrNotFound) {
-			return ErrHumanNotFound
-		}
-
-		return err
-	}
-
-	return nil
+    return nil
 }

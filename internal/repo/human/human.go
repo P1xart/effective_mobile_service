@@ -33,10 +33,9 @@ func (r *Repo) Create(ctx context.Context, body *entity.Human) error {
 		return err
 	}
 
-	r.log.Info("create human query", slog.String("query", q))
+	r.log.Debug("create human query", slog.String("query", q))
 
-	_, err = r.Pool.Exec(ctx, q, args...)
-	if err != nil {
+	if _, err = r.Pool.Exec(ctx, q, args...); err != nil {
 		r.log.Error("failed to insert new human", logger.Error(err))
 		return err
 	}
@@ -50,11 +49,11 @@ func (r *Repo) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]enti
 		From("humans")
 
 	if filters.AgeFrom != 0 {
-		qb = qb.Where("age >= ?", filters.AgeFrom)
+		qb = qb.Where(squirrel.GtOrEq{"age": filters.AgeFrom})
 	}
 
 	if filters.AgeTo != 0 {
-		qb = qb.Where("age <= ?", filters.AgeTo)
+		qb = qb.Where(squirrel.LtOrEq{"age": filters.AgeTo})
 	}
 
 	if len(filters.Gender) != 0 {
@@ -92,25 +91,7 @@ func (r *Repo) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]enti
 	return humans, nil
 }
 
-func (r *Repo) UpdateByID(ctx context.Context, id int, updates *entity.Human) error {
-	tx, err := r.Pool.Begin(ctx)
-	if err != nil {
-		r.log.Error("failed to start transaction", logger.Error(err))
-		return err
-	}
-
-	defer func() {
-		if err != nil {
-			if err := tx.Rollback(ctx); err != nil {
-				r.log.Error("failed to rollback transaction", logger.Error(err))
-			}
-		} else {
-			if err := tx.Commit(ctx); err != nil {
-				r.log.Error("failed to commit transaction", logger.Error(err))
-			}
-		}
-	}()
-
+func (r *Repo) UpdateByID(ctx context.Context, id string, updates *entity.Human) error {
 	builder := r.Builder.Update("humans")
 
 	if updates.Name != "" {
@@ -137,13 +118,14 @@ func (r *Repo) UpdateByID(ctx context.Context, id int, updates *entity.Human) er
 		builder = builder.Set("nationality", updates.Nationality)
 	}
 
-	query, args, err := builder.Where(squirrel.Eq{"id": id}).ToSql()
+	q, args, err := builder.Where(squirrel.Eq{"id": id}).ToSql()
 	if err != nil {
 		r.log.Error("failed to build SQL query", slog.Any("id", id), logger.Error(err))
 		return err
 	}
+	r.log.Debug("update human query", slog.String("query", q))
 
-	exec, err := tx.Exec(ctx, query, args...)
+	exec, err := r.Pool.Exec(ctx, q, args...)
 	if err != nil {
 		r.log.Error("failed to execute update query", slog.Any("id", id), logger.Error(err))
 		return err
@@ -154,14 +136,14 @@ func (r *Repo) UpdateByID(ctx context.Context, id int, updates *entity.Human) er
 	return nil
 }
 
-func (r *Repo) DeleteByID(ctx context.Context, id int) error {
+func (r *Repo) DeleteByID(ctx context.Context, id string) error {
 	q, args, err := r.Builder.Delete("humans").Where(squirrel.Eq{"id": id}).ToSql()
 	if err != nil {
 		r.log.Error("failed to make query", logger.Error(err))
 		return err
 	}
 
-	r.log.Info("delete human by id query", slog.String("query", q))
+	r.log.Debug("delete human by id query", slog.String("query", q))
 
 	result, err := r.Pool.Exec(ctx, q, args...)
 	if err != nil {

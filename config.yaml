@@ -1,11 +1,4 @@
-http:
-  host: localhost
-  port: 8081
-postgresql:
-  user:
-  password:
-  host:
-  port:
-  database: eff_mobile
-  ssl_mode:
-
+api:
+  age_url: https://api.agify.io
+  gender_url: https://api.genderize.io
+  nation_url: https://api.nationalize.io

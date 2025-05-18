@@ -8,7 +8,7 @@ import (
 
 func Log(log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Info("request", slog.String("method", c.Request.Method), slog.String("uri", c.Request.URL.Path))
+		log.Debug("request", slog.String("method", c.Request.Method), slog.String("uri", c.Request.URL.Path))
 		c.Next()
 	}
 }

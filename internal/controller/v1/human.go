@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/P1xart/effective_mobile_service/internal/config"
 	"github.com/P1xart/effective_mobile_service/internal/controller/v1/request"
 	"github.com/P1xart/effective_mobile_service/internal/controller/v1/response"
 	_ "github.com/P1xart/effective_mobile_service/internal/entity"
@@ -73,7 +72,7 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 		Name:       human.Name,
 		Surname:    human.Surname,
 		Potronymic: human.Potronymic,
-	}, config.ApiUrls{})
+	})
 	if err != nil {
 		r.log.Error("failed to create human", logger.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -82,6 +81,7 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 		return
 	}
 
+	r.log.Info("created new human")
 	c.Status(http.StatusCreated)
 }
 
@@ -94,8 +94,8 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 // @Param age_to query string false "Возраст до"
 // @Param gender query string false "Пол"
 // @Param nationaly query string false "Национальность"
-// @Param limit query int false "Максимальное количество возвращаемых людей" default(10)
-// @Param offset query int false "Число первых пропущенных возвращаемых людей" default(0)
+// @Param limit query int false default(10)
+// @Param offset query int false default(0)
 // @Success 200 {object} response.GetAllHumans
 // @Router /v1/human [get]
 func (r *humanRoutes) getHumans(c *gin.Context) {
@@ -126,9 +126,9 @@ func (r *humanRoutes) getHumans(c *gin.Context) {
 // @Success 204 "No Content"
 // @Router /v1/human/{id} [delete]
 func (r *humanRoutes) deleteHumanByID(c *gin.Context) {
-	IDStr := c.Param("id")
+	userID := c.Param("id")
 
-	err := r.humanService.DeleteByID(c, IDStr)
+	err := r.humanService.DeleteByID(c, userID)
 	if err != nil {
 		if errors.Is(err, service.ErrHumanNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -144,6 +144,7 @@ func (r *humanRoutes) deleteHumanByID(c *gin.Context) {
 		return
 	}
 
+	r.log.Info("deleted user", slog.String("userID", userID))
 	c.Status(http.StatusNoContent)
 }
 
@@ -156,7 +157,7 @@ func (r *humanRoutes) deleteHumanByID(c *gin.Context) {
 // @Success 204 "No Content"
 // @Router /v1/human/{id} [patch]
 func (r *humanRoutes) updateCarByID(c *gin.Context) {
-	humanIDStr := c.Param("id")
+	userID := c.Param("id")
 	var updateData request.UpdateHuman
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
@@ -167,7 +168,7 @@ func (r *humanRoutes) updateCarByID(c *gin.Context) {
 		return
 	}
 
-	if err := r.humanService.UpdateByID(c, humanIDStr, &service.HumanInput{
+	if err := r.humanService.UpdateByID(c, userID, &service.HumanInput{
 		Name: updateData.Name,
 		Surname: updateData.Surname,
 		Potronymic: updateData.Potronymic,
@@ -188,6 +189,6 @@ func (r *humanRoutes) updateCarByID(c *gin.Context) {
 		})
 		return
 	}
-	r.log.Debug("successfully updated human", slog.String("id", humanIDStr))
+	r.log.Info("successfully updated human", slog.String("user id", userID))
 	c.Status(http.StatusNoContent)
 }

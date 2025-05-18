@@ -41,12 +41,6 @@ func checkLimitOffset(limit, offset int) bool {
 func buildFilters(c *gin.Context) *entity.HumanFilters {
 	limit, errLimit := limit(c)
 	offset, errOffset := offset(c)
-	ageFromStr := c.Query("age_from")
-	ageToStr := c.Query("age_to")
-	genderStr := c.Query("gender")
-	nationalyStr := c.Query("nationaly")
-	queryUrl := c.Request.URL.RawQuery
-
 	ok := checkLimitOffset(limit, offset)
 	if !ok || errLimit != nil || errOffset != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -55,8 +49,16 @@ func buildFilters(c *gin.Context) *entity.HumanFilters {
 		return nil
 	}
 
-	var ageFrom, ageTo uint64
-	var err error
+	ageFromStr := c.Query("age_from")
+	ageToStr := c.Query("age_to")
+	genderStr := c.Query("gender")
+	nationalyStr := c.Query("nationaly")
+	queryUrl := c.Request.URL.RawQuery
+
+	var (
+		ageFrom, ageTo uint64
+		err error
+	)
 	if ageFromStr != "" {
 		ageFrom, err = strconv.ParseUint(ageFromStr, 10, 8)
 		if err != nil {

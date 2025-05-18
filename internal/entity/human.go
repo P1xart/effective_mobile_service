@@ -3,11 +3,11 @@ package entity
 import "time"
 
 type Human struct {
-	ID          int       `json:"id" db:"id"`
+	ID          string    `json:"id" db:"id"`
 	Name        string    `json:"name" db:"name"`
 	Surname     string    `json:"surname" db:"surname"`
 	Potronymic  string    `json:"potronymic,omitempty" db:"potronymic"`
-	Age         uint8     `json:"age" db:"age"`
+	Age         int       `json:"age" db:"age"`
 	Gender      string    `json:"Gender" db:"gender"`
 	Nationality string    `json:"nationality" db:"nationality"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
@@ -16,7 +16,7 @@ type Human struct {
 type AgeResp struct {
 	Count int    `json:"count"`
 	Name  string `json:"name"`
-	Age   string `json:"age"`
+	Age   int    `json:"age"`
 }
 
 type GenderResp struct {

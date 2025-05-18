@@ -28,6 +28,7 @@ services:
     restart: always
     environment:
       APP_ENV: prod
+      LOG_LEVEL: info
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 8080
       PG_USER: postgres

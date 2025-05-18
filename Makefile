@@ -13,6 +13,12 @@ docs:
 .PHONY: gen
 gen: mock docs
 
+
+.PHONY: integration-test
+integration-test:
+	export CONFIG_PATH=../../config.yaml && \
+	go test ./... -v -tags=integration
+
 .PHONY: dev
 dev:
 	docker compose up --build postgres service
