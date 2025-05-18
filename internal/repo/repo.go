@@ -10,9 +10,9 @@ import (
 )
 
 type Human interface {
-	Create(ctx context.Context, body *entity.Human) error
+	Create(ctx context.Context, body *entity.Human) (*entity.Human, error)
 	GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error)
-	UpdateByID(ctx context.Context, id string, updates *entity.Human) error
+	UpdateByID(ctx context.Context, id string, updates *entity.Human) (*entity.Human, error)
 	DeleteByID(ctx context.Context, id string) error
 }
 

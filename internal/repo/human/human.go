@@ -25,22 +25,26 @@ func NewRepo(log *slog.Logger, pg *postgresql.Postgres) *Repo {
 	}
 }
 
-func (r *Repo) Create(ctx context.Context, body *entity.Human) error {
+func (r *Repo) Create(ctx context.Context, body *entity.Human) (*entity.Human, error) {
 	q, args, err := r.Builder.Insert("humans").Columns("name", "surname", "potronymic", "age", "gender", "nationality").
-		Values(body.Name, body.Surname, body.Potronymic, body.Age, body.Gender, body.Nationality).ToSql()
+		Values(body.Name, body.Surname, body.Potronymic, body.Age, body.Gender, body.Nationality).Suffix("RETURNING id, age, gender, nationality").ToSql()
 	if err != nil {
 		r.log.Error("failed to make query", logger.Error(err))
-		return err
+		return nil, err
 	}
 
 	r.log.Debug("create human query", slog.String("query", q))
 
-	if _, err = r.Pool.Exec(ctx, q, args...); err != nil {
-		r.log.Error("failed to insert new human", logger.Error(err))
-		return err
+	if err := r.Pool.QueryRow(ctx, q, args...).Scan(
+		&body.ID,
+		&body.Age,
+		&body.Gender,
+		&body.Nationality,
+	); err != nil {
+		r.log.Error("failed to create human", logger.Error(err))
 	}
 
-	return nil
+	return body, nil
 }
 
 func (r *Repo) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error) {
@@ -91,7 +95,7 @@ func (r *Repo) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]enti
 	return humans, nil
 }
 
-func (r *Repo) UpdateByID(ctx context.Context, id string, updates *entity.Human) error {
+func (r *Repo) UpdateByID(ctx context.Context, id string, updates *entity.Human) (*entity.Human, error) {
 	builder := r.Builder.Update("humans")
 
 	if updates.Name != "" {
@@ -118,22 +122,26 @@ func (r *Repo) UpdateByID(ctx context.Context, id string, updates *entity.Human)
 		builder = builder.Set("nationality", updates.Nationality)
 	}
 
-	q, args, err := builder.Where(squirrel.Eq{"id": id}).ToSql()
+	q, args, err := builder.Where(squirrel.Eq{"id": id}).Suffix("RETURNING id, age, gender, nationality").ToSql()
 	if err != nil {
 		r.log.Error("failed to build SQL query", slog.Any("id", id), logger.Error(err))
-		return err
+		return nil, err
 	}
+
 	r.log.Debug("update human query", slog.String("query", q))
 
-	exec, err := r.Pool.Exec(ctx, q, args...)
-	if err != nil {
-		r.log.Error("failed to execute update query", slog.Any("id", id), logger.Error(err))
-		return err
+	if err := r.Pool.QueryRow(ctx, q, args...).Scan(
+		&updates.ID,
+		&updates.Age,
+		&updates.Gender,
+		&updates.Nationality,
+	); err != nil {
+		r.log.Error("failed to create human", logger.Error(err))
 	}
 
-	r.log.Debug("update rows affected", slog.Int64("rows affected", exec.RowsAffected()))
+	r.log.Debug("update rows successfuly")
 
-	return nil
+	return updates, nil
 }
 
 func (r *Repo) DeleteByID(ctx context.Context, id string) error {

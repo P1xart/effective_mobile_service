@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/P1xart/effective_mobile_service/internal/entity"
 	"github.com/P1xart/effective_mobile_service/internal/repo"
 	"github.com/P1xart/effective_mobile_service/pkg/utest"
 
@@ -31,8 +32,10 @@ func TestHumanService_Create(t *testing.T) {
 		Surname: "Dmitrievich",
 	}
 
-	err := humanService.Create(ctx, expectedHuman)
+	human, err := humanService.Create(ctx, expectedHuman)
 	require.NoError(t, err)
+	require.Equal(t, human.Name, expectedHuman.Name)
+	require.Equal(t, human.Surname, expectedHuman.Surname)
 }
 
 func TestHumanService_GetAll(t *testing.T) {
@@ -53,7 +56,9 @@ func TestHumanService_GetAll(t *testing.T) {
 		Surname: "Dmitrievich",
 	}
 
-	err := humanService.Create(ctx, expectedHuman)
+	_, err := humanService.Create(ctx, expectedHuman)
+	require.NoError(t, err)
+	_, err = humanService.GetAll(ctx, &entity.HumanFilters{})
 	require.NoError(t, err)
 }
 
@@ -75,7 +80,7 @@ func TestHumanService_UpdateByID(t *testing.T) {
 		Surname: "Dmitrievich",
 	}
 
-	err := humanService.Create(ctx, expectedHuman)
+	createdHuman, err := humanService.Create(ctx, expectedHuman)
 	require.NoError(t, err)
 
 	expectedUpdateHuman := &HumanInput{
@@ -86,8 +91,11 @@ func TestHumanService_UpdateByID(t *testing.T) {
 		Gender: "female",
 	}
 
-	err = humanService.UpdateByID(ctx, "1", expectedUpdateHuman)
+	updatedHuman, err := humanService.UpdateByID(ctx, createdHuman.ID, expectedUpdateHuman)
 	require.NoError(t, err)
+	require.Equal(t, expectedUpdateHuman.Name, updatedHuman.Name)
+	require.Equal(t, expectedUpdateHuman.Age, updatedHuman.Age)
+	require.Equal(t, expectedUpdateHuman.Gender, updatedHuman.Gender)
 }
 
 func TestHumanService_Delete(t *testing.T) {
@@ -108,8 +116,11 @@ func TestHumanService_Delete(t *testing.T) {
 		Surname: "Dmitrievich",
 	}
 
-	err := humanService.Create(ctx, expectedHuman)
+	human, err := humanService.Create(ctx, expectedHuman)
 	require.NoError(t, err)
-	err = humanService.DeleteByID(ctx, "1")
+	err = humanService.DeleteByID(ctx, human.ID)
 	require.NoError(t, err)
+	getHuman, err := humanService.GetAll(ctx, &entity.HumanFilters{})
+	require.NoError(t, err)
+	require.Len(t, getHuman, 0)
 }

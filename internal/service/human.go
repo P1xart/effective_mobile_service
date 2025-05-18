@@ -41,26 +41,27 @@ func NewHumanService(log *slog.Logger, humanRepo repo.Human, apiUrls *config.Api
 	}
 }
 
-func (s *HumanService) Create(ctx context.Context, body *HumanInput) error {
+func (s *HumanService) Create(ctx context.Context, body *HumanInput) (*entity.Human, error) {
 	err := s.fillUserData(ctx, body)
 	if err != nil {
 		s.log.Error("failed to fill user data from api", logger.Error(err))
-		return err
+		return nil, err
 	}
 
-	if err = s.humanRepo.Create(ctx, &entity.Human{
+	human, err := s.humanRepo.Create(ctx, &entity.Human{
 		Name:        body.Name,
 		Surname:     body.Surname,
 		Potronymic:  body.Potronymic,
 		Age:         body.Age,
 		Gender:      body.Gender,
 		Nationality: body.Nationality,
-	}); err != nil {
+	})
+	if err != nil {
 		s.log.Error("failed to create human", logger.Error(err))
-        return err
+        return nil, err
 	}
 
-	return nil
+	return human, nil
 }
 
 func (s *HumanService) GetAll(ctx context.Context, filters *entity.HumanFilters) ([]entity.Human, error) {
@@ -79,23 +80,24 @@ func (s *HumanService) DeleteByID(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *HumanService) UpdateByID(ctx context.Context, id string, updates *HumanInput) error {
-	if err := s.humanRepo.UpdateByID(ctx, id, &entity.Human{
+func (s *HumanService) UpdateByID(ctx context.Context, id string, updates *HumanInput) (*entity.Human, error) {
+	updatedHuman, err := s.humanRepo.UpdateByID(ctx, id, &entity.Human{
 		Name:        updates.Name,
 		Surname:     updates.Surname,
 		Potronymic:  updates.Potronymic,
 		Age:         updates.Age,
 		Gender:      updates.Gender,
 		Nationality: updates.Nationality,
-	}); err != nil {
+	})
+	if err != nil {
 		if errors.Is(err, repoerrors.ErrNotFound) {
-			return ErrHumanNotFound
+			return nil, ErrHumanNotFound
 		}
 
-		return err
+		return nil, err
 	}
 
-	return nil
+	return updatedHuman, nil
 }
 
 func (s *HumanService) fillUserData(ctx context.Context, body *HumanInput) error {

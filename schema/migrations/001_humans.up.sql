@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS humans (
-    ID SERIAL primary key,
+    id SERIAL primary key,
     name VARCHAR(50) NOT NULL,
     surname VARCHAR(50) NOT NULL,
     potronymic VARCHAR(50),

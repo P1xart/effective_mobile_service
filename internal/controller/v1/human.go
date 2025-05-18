@@ -44,7 +44,7 @@ func newHumanRoutes(log *slog.Logger, g *gin.RouterGroup, humanService service.H
 // @Tags люди
 // @Accept json
 // @Param input body request.CreateHuman true "Тело запроса"
-// @Success 201
+// @Success 201 {object} entity.Human
 // @Router /v1/human/ [post]
 func (r *humanRoutes) createNewHuman(c *gin.Context) {
 	var human request.CreateHuman
@@ -68,7 +68,7 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 		return
 	}
 
-	err = r.humanService.Create(c, &service.HumanInput{
+	createdHuman, err := r.humanService.Create(c, &service.HumanInput{
 		Name:       human.Name,
 		Surname:    human.Surname,
 		Potronymic: human.Potronymic,
@@ -82,7 +82,9 @@ func (r *humanRoutes) createNewHuman(c *gin.Context) {
 	}
 
 	r.log.Info("created new human")
-	c.Status(http.StatusCreated)
+	c.JSON(http.StatusCreated, gin.H{
+		"human": createdHuman,
+	})
 }
 
 // @Summary Получить всех людей
@@ -154,7 +156,7 @@ func (r *humanRoutes) deleteHumanByID(c *gin.Context) {
 // @Accept json
 // @Param id path string true "Идентификатор человека"
 // @Param input body request.UpdateHuman true "Тело запроса"
-// @Success 204 "No Content"
+// @Success 200 {object} entity.Human
 // @Router /v1/human/{id} [patch]
 func (r *humanRoutes) updateCarByID(c *gin.Context) {
 	userID := c.Param("id")
@@ -168,14 +170,15 @@ func (r *humanRoutes) updateCarByID(c *gin.Context) {
 		return
 	}
 
-	if err := r.humanService.UpdateByID(c, userID, &service.HumanInput{
-		Name: updateData.Name,
-		Surname: updateData.Surname,
-		Potronymic: updateData.Potronymic,
-		Age: updateData.Age,
-		Gender: updateData.Gender,
+	updatedHuman, err := r.humanService.UpdateByID(c, userID, &service.HumanInput{
+		Name:        updateData.Name,
+		Surname:     updateData.Surname,
+		Potronymic:  updateData.Potronymic,
+		Age:         updateData.Age,
+		Gender:      updateData.Gender,
 		Nationality: updateData.Nationality,
-	}); err != nil {
+	})
+	if err != nil {
 		if errors.Is(err, service.ErrHumanNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": service.ErrHumanNotFound.Error(),
@@ -190,5 +193,7 @@ func (r *humanRoutes) updateCarByID(c *gin.Context) {
 		return
 	}
 	r.log.Info("successfully updated human", slog.String("user id", userID))
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusOK, gin.H{
+		"human": updatedHuman,
+	})
 }
