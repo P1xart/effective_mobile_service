@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/P1xart/effective_mobile_service/internal/config"
 	"github.com/P1xart/effective_mobile_service/internal/repo"
 	"github.com/P1xart/effective_mobile_service/pkg/utest"
 
@@ -23,7 +22,7 @@ func TestHumanService_Create(t *testing.T) {
 
 	repositories := repo.NewRepositories(log, pg)
 
-	humanService := NewHumanService(log, repositories.Human, &config.ApiUrls{})
+	humanService := NewHumanService(log, repositories.Human, &cfg.API)
 
 	ctx := context.Background()
 
@@ -45,7 +44,7 @@ func TestHumanService_GetAll(t *testing.T) {
 
 	repositories := repo.NewRepositories(log, pg)
 
-	humanService := NewHumanService(log, repositories.Human, &config.ApiUrls{})
+	humanService := NewHumanService(log, repositories.Human, &cfg.API)
 
 	ctx := context.Background()
 
@@ -67,7 +66,7 @@ func TestHumanService_UpdateByID(t *testing.T) {
 
 	repositories := repo.NewRepositories(log, pg)
 
-	humanService := NewHumanService(log, repositories.Human, &config.ApiUrls{})
+	humanService := NewHumanService(log, repositories.Human, &cfg.API)
 
 	ctx := context.Background()
 
@@ -100,7 +99,7 @@ func TestHumanService_Delete(t *testing.T) {
 
 	repositories := repo.NewRepositories(log, pg)
 
-	humanService := NewHumanService(log, repositories.Human, &config.ApiUrls{})
+	humanService := NewHumanService(log, repositories.Human, &cfg.API)
 
 	ctx := context.Background()
 
