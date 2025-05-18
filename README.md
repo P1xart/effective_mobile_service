@@ -1,5 +1,7 @@
 # Тестовое задание в Effective Mobile
 
+[![testing](https://github.com/P1xart/effective_mobile_service/actions/workflows/test.yaml/badge.svg)](https://github.com/P1xart/effective_mobile_service/actions/workflows/test.yaml)
+
 ## Запуск
 Если сервис запускается впервые, нужно запустить миграции
 ```

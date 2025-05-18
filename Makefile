@@ -20,7 +20,7 @@ integration-test:
 
 .PHONY: prod
 prod:
-	docker compose up --build -d
+	docker compose up --build
 
 .PHONY: migrate
 migrate: 
