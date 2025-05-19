@@ -43,6 +43,8 @@ func TestHumanService_GetAll(t *testing.T) {
 
 	log.Debug("test configuration", slog.Any("cfg", cfg))
 
+	defer utest.TeardownTable(log, pg, "humans")
+
 	repositories := repo.NewRepositories(log, pg)
 
 	humanService := NewHumanService(log, repositories.Human, &cfg.API)
@@ -52,7 +54,7 @@ func TestHumanService_GetAll(t *testing.T) {
 	expectedHuman1 := &HumanInput{
 		Name: "Mihail",
 		Surname: "Dmitrievich",
-		Age: 19,
+		Age: 58,
 		Gender: "male",
 		Nationality: "RU",
 	}
@@ -64,9 +66,9 @@ func TestHumanService_GetAll(t *testing.T) {
 		Nationality: "US",
 	}
 	expectedHuman3 := &HumanInput{
-		Name: "Jan",
+		Name: "Mihail",
 		Surname: "Casanova",
-		Age: 56,
+		Age: 58,
 		Gender: "male",
 		Nationality: "RU",
 	}
@@ -78,11 +80,30 @@ func TestHumanService_GetAll(t *testing.T) {
 	_, err = humanService.Create(ctx, expectedHuman3)
 	require.NoError(t, err)
 
+	allHumans, err := humanService.GetAll(ctx, &entity.HumanFilters{Limit: 10, Offset: 0})
+	require.NoError(t, err)
+
+	ages := make(map[int]int)
+	for _, value := range allHumans {
+		if _, ok := ages[value.Age]; ok {
+			ages[value.Age]++
+		} else {
+			ages[value.Age] = 1
+		}
+	}
+
+	var maxCounts int // age key
+	for key, value := range ages {
+		if value > maxCounts {
+			maxCounts = key
+		}
+	}
+
 	femaleHumans, err := humanService.GetAll(ctx, &entity.HumanFilters{Limit: 10, Offset: 0, Gender: []string{"female"}})
 	require.NoError(t, err)
 	require.Equal(t, expectedHuman2.Gender, femaleHumans[0].Gender)
 
-	ageHumans, err := humanService.GetAll(ctx, &entity.HumanFilters{Limit: 10, Offset: 0, AgeFrom: 10, AgeTo: 30})
+	ageHumans, err := humanService.GetAll(ctx, &entity.HumanFilters{Limit: 10, Offset: 0, AgeFrom: uint8(maxCounts), AgeTo: uint8(maxCounts)})
 	require.NoError(t, err)
 	require.Len(t, ageHumans, 2)
 
