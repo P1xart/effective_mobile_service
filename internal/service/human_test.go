@@ -107,9 +107,9 @@ func TestHumanService_GetAll(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, ageHumans, 2)
 
-	nationHumans, err := humanService.GetAll(ctx, &entity.HumanFilters{Limit: 10, Offset: 0, Nationaly: []string{"US"}})
+	nationHumans, err := humanService.GetAll(ctx, &entity.HumanFilters{Limit: 10, Offset: 0, Nationaly: []string{"RO"}})
 	require.NoError(t, err)
-	require.Len(t, nationHumans, 1)
+	require.Len(t, nationHumans, 2)
 }
 
 func TestHumanService_UpdateByID(t *testing.T) {
