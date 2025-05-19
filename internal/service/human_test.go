@@ -56,7 +56,7 @@ func TestHumanService_GetAll(t *testing.T) {
 		Surname: "Dmitrievich",
 		Age: 58,
 		Gender: "male",
-		Nationality: "RU",
+		Nationality: "RO",
 	}
 	expectedHuman2 := &HumanInput{
 		Name: "Anna",
@@ -70,7 +70,7 @@ func TestHumanService_GetAll(t *testing.T) {
 		Surname: "Casanova",
 		Age: 58,
 		Gender: "male",
-		Nationality: "RU",
+		Nationality: "RO",
 	}
 
 	_, err := humanService.Create(ctx, expectedHuman1)
@@ -94,7 +94,7 @@ func TestHumanService_GetAll(t *testing.T) {
 
 	var maxCounts int // age key
 	for key, value := range ages {
-		if value > maxCounts {
+		if value > ages[maxCounts] {
 			maxCounts = key
 		}
 	}

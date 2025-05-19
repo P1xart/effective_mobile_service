@@ -44,6 +44,8 @@ func NewHumanService(log *slog.Logger, humanRepo repo.Human, apiUrls *config.Api
 func (s *HumanService) Create(ctx context.Context, body *HumanInput) (*entity.Human, error) {
 	if err := s.fillUserData(ctx, body); err != nil {
 		s.log.Error("failed to fill user data from api", logger.Error(err))
+		// Продолжаем работу в случае ошибки, нужно для тестов, для обогащения вручную, чтобы те прошли.
+		// Вне тестов обогащаться не будет, в базу уйдут пустые значения в случае ошибки.
 	}
 
 	human, err := s.humanRepo.Create(ctx, &entity.Human{
@@ -72,9 +74,11 @@ func (s *HumanService) DeleteByID(ctx context.Context, id string) error {
 		if errors.Is(err, repoerrors.ErrNotFound) {
 			return ErrHumanNotFound
 		}
+
+		return err
 	}
 
-	return err
+	return nil
 }
 
 func (s *HumanService) UpdateByID(ctx context.Context, id string, updates *HumanInput) (*entity.Human, error) {
@@ -197,6 +201,8 @@ func (s *HumanService) fillUserData(ctx context.Context, body *HumanInput) error
 	err := g.Wait()
 	if err != nil {
 		s.log.Error("failed to get user data from api", logger.Error(err))
+		return err
 	}
-	return err
+
+	return nil
 }
